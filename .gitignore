@@ -13,7 +13,7 @@ __pycache__/
 *.pyd
 
 # Data files (optionnel si trop lourd)
-data/*.csv
+#data/*.csv
 
 # VS Code settings
 .vscode/
