@@ -1,0 +1,22 @@
+# Environments
+venv/
+.env/
+__pycache__/
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+
+# Python compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Data files (optionnel si trop lourd)
+data/*.csv
+
+# VS Code settings
+.vscode/
+
+# Notebook autosaves
+*.ipynb_checkpoints
