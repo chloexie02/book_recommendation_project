@@ -20,3 +20,6 @@ __pycache__/
 
 # Notebook autosaves
 *.ipynb_checkpoints
+
+# Ignore large pickle files
+data/*.pkl
