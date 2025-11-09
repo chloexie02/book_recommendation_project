@@ -209,42 +209,41 @@ print("\n=== STEP 5 : Create User-Item Matrix and Similarity Matrix ===")
 # The similarity matrix measures how similar users (or books) are based on their ratings, and it is used to find similar users or items for generating recommendations.
 
 #Create the User-Item Matrix 
-user_item_matrix = ratings.pivot_table(index='User-ID', columns='ISBN', values='Book-Rating')
+book_user_matrix = ratings.pivot_table(index='ISBN', columns='User-ID', values='Book-Rating')
 
-print("User-Item matrix shape:", user_item_matrix.shape)
-print("The head of User-Item matrix is :\n",user_item_matrix.head())
+print("Book-User matrix shape:", book_user_matrix.shape)
+print("The head of Book-User matrix is :\n",book_user_matrix.head())
 
-print(user_item_matrix.isnull().sum().sum())  # Count missing ratings (NaN)
+print(book_user_matrix.isnull().sum().sum())  # Count missing ratings (NaN)
 
-# Visualize sparsity of the user-item matrix
+# Visualize sparsity of the book-users matrix
 plt.figure(figsize=(8,6))
-plt.spy(user_item_matrix, markersize=1, color='black')
+plt.spy(book_user_matrix, markersize=1, color='black')
 plt.title("User-Item Matrix Sparsity")
-plt.xlabel("Books")
-plt.ylabel("Users")
+plt.xlabel("Users")
+plt.ylabel("Books")
 plt.show()
 
-# The plot shows that the matrix is extremely sparse, meaning most users have rated only a few books.
-# This sparsity is typical in recommendation systems and is a key challenge to handle when training models.
+# Each black point represents a rating. Most cells are empty (NaN), showing sparsity typical in recommendation systems.
 
-# Compute cosine similarity between users (based on their ratings)
-print("Computing user similarity matrix (this may take a moment)...")
+# Compute cosine similarity between books (based on their ratings)
+print("Computing book similarity matrix (this may take a moment)...")
 # Fill NaN with 0 for similarity computation
-user_similarity_array = cosine_similarity(user_item_matrix.fillna(0))
-user_similarity = pd.DataFrame(user_similarity_array,index=user_item_matrix.index,columns=user_item_matrix.index)
-print("The head of User Similarity is :\n",user_similarity.head())
+book_similarity_array = cosine_similarity(book_user_matrix.fillna(0))
+book_similarity = pd.DataFrame(book_similarity_array,index=book_user_matrix.index,columns=book_user_matrix.index)
+print("The head of User Similarity is :\n",book_similarity.head())
 
 #Parameters 
 DATA_DIR = "/Users/chloexie/Documents/3A IMT/Keio/computer science/book_recommendation_project/data"
-USER_ITEM_PICKLE = os.path.join(DATA_DIR, "user_item_matrix.pkl")
-SIMILARITY_PICKLE = os.path.join(DATA_DIR, "user_similarity.pkl")
+BOOK_USER_PICKLE = os.path.join(DATA_DIR, "book_user_matrix.pkl")
+SIMILARITY_PICKLE = os.path.join(DATA_DIR, "book_similarity.pkl")
 
 #Save the user-item matrix for later use (faster access)
-with open(USER_ITEM_PICKLE, "wb") as f:
-    pickle.dump(user_item_matrix, f)
-print(f"User-Item matrix saved at: {USER_ITEM_PICKLE}")
+with open(BOOK_USER_PICKLE, "wb") as f:
+    pickle.dump(book_user_matrix, f)
+print(f"User-Item matrix saved at: {BOOK_USER_PICKLE}")
 
 # Save the similarity matrix
 with open(SIMILARITY_PICKLE, "wb") as f:
-    pickle.dump(user_similarity, f)
+    pickle.dump(book_similarity, f)
 print(f"User similarity matrix saved at: {SIMILARITY_PICKLE}")
