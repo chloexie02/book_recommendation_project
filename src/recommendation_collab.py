@@ -44,7 +44,7 @@ def build_user_item_matrix(ratings_df,rebuild=False):
 
 #--- Create book-user matrix (use pivot)----
 book_user_matrix = build_user_item_matrix(ratings,rebuild=False)
-print("User-Item matrix shape : ", book_user_matrix.shape)
+print("Book-User matrix shape : ", book_user_matrix.shape)
 
 #--- Compute or load user similarity (cosine) ---
 def compute_book_similarity(book_item_df, rebuild=False):
@@ -53,9 +53,9 @@ def compute_book_similarity(book_item_df, rebuild=False):
     similarity computation because missing == no rating.
     """
     if (not rebuild) and os.path.exists(SIMILARITY_PICKLE):
-        print("Loading precomputed user similarity from pickle.")
+        print("Loading precomputed book similarity from pickle.")
         return pickle.load(open(SIMILARITY_PICKLE,"rb"))
-    print("Computing user similarity (cosine).")
+    print("Computing book similarity (cosine).")
     #fill NaN with 0 for similarity calculation
     sim = cosine_similarity(book_item_df.fillna(0).values)
     sim_df = pd.DataFrame(sim,index = book_item_df.index, columns=book_item_df.index)
@@ -87,9 +87,11 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
 
     #Top N recommendations
     top_isbns = sim_scores.sort_values(ascending=False).head(top_n).index
-    recommended_books = books_df[['ISBN'].isin(top_isbns)].isin(top_isbns)[['ISBN','Book-Title','Book-Author']]
+    # Keep only top_isbns present in books_df
+    top_isbns_in_books = [isbn for isbn in top_isbns if isbn in books_df['ISBN'].values]
+    recommended_books = books_df[books_df['ISBN'].isin(top_isbns_in_books)].copy()
     recommended_books['score']=recommended_books['ISBN'].map(lambda x: sim_scores.get(x, 0))
-    recommended_books = recommended_books.set_index('ISBN').loc[top_isbns].reset_index()
+    recommended_books = recommended_books.set_index('ISBN').loc[top_isbns_in_books].reset_index()
     return recommended_books
 
 # --- Example  ---
