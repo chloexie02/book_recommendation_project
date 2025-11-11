@@ -10,7 +10,7 @@ criteria.
 The main objective is to demonstrate how data science can enhance user experience in digital reading platforms by learning from user behavior.
 
 ## Dataset 
-The project uses the public Book Recommendation Dataset available on [Kaggle](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset?utm_source=chatgpt.com).
+The project uses the public Book Recommendation Dataset available on [Kaggle](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset/data).
 
 | File  | Description     |
 |-------|--------------------------------------------|
