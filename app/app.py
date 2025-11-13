@@ -35,7 +35,7 @@ st.markdown("""
 
 #--- APP TITLE ---
 st.markdown("<h1 class='title'> Book Recommendation System</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Choose your recommendation mode</p>", unsafe_allow_html=True)
+#st.markdown("<p class='subtitle'>Choose your recommendation mode</p>", unsafe_allow_html=True)
 
 #--- Choice page ---
 mode = st.radio(
@@ -46,29 +46,71 @@ mode = st.radio(
 
 #--- Option 1 : favorites ---
 if mode == "📚 Based on my favorite books":
-    st.markdown("### Enter your 5 favorite books")
+    st.markdown("### Choose your 5 favorite books")
+
+    #Extract unique authors from the books dataset (already loaded from recommendation_collab)
+    authors = sorted(books["Book-Author"].dropna().unique())
 
     favorite_books = []
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        fav1 = st.text_input("Book 1")
-    with col2:
-        fav2 = st.text_input("Book 2")
-    with col3:
-        fav3 = st.text_input("Book 3")
-    with col4:
-        fav4 = st.text_input("Book 4")
-    with col5:
-        fav5 = st.text_input("Book 5")
+    favorite_authors = []
 
-    favorite_books = [fav for fav in [fav1, fav2, fav3, fav4, fav5] if fav]
+    # Create 5 columns for 5 favorite book selections
+
+    #col1, col2, col3, col4, col5 = st.columns(5)
+    #with col1:
+    #    fav1 = st.text_input("Book 1")
+    #with col2:
+    #    fav2 = st.text_input("Book 2")
+    #with col3:
+    #    fav3 = st.text_input("Book 3")
+    #with col4:
+    #    fav4 = st.text_input("Book 4")
+    #with col5:
+    #    fav5 = st.text_input("Book 5")
+
+    #favorite_books = [fav for fav in [fav1, fav2, fav3, fav4, fav5] if fav]
+
+    cols = st.columns(5)
+    for i, col in enumerate(cols):
+        with col:
+            st.markdown(f"**Book {i+1}**")
+
+            # Select author from dropdown
+            selected_author = st.selectbox(
+                f"Author {i+1}",
+                options=[""] + authors,
+                key=f"author_{i}"
+            )
+
+            # If an author is selected, filter books by that author
+            if selected_author:
+                filtered_books = books[books["Book-Author"] == selected_author]["Book-Title"].sort_values().unique()
+                selected_book = st.selectbox(
+                    f"Title {i+1}",
+                    options=[""] + list(filtered_books),
+                    key=f"title_{i}"
+                )
+            else:
+                selected_book = None
+
+            # Append to favorites if a book is selected
+            if selected_book:
+                favorite_books.append(selected_book)
+                favorite_authors.append(selected_author)
 
     if st.button("Show Recommendations"):
         if len(favorite_books) == 0:
             st.warning("Please enter at least one favorite book.")
         else:
             # Convert titles to ISBNs if needed
-            favorite_isbns = books[books["Book-Title"].isin(favorite_books)]["ISBN"].tolist()
+            #favorite_isbns = books[books["Book-Title"].isin(favorite_books)]["ISBN"].tolist()
+            # Retrieve ISBNs based on both Author and Title to avoid duplicates
+            favorite_isbns = []
+            for author, title in zip(favorite_authors, favorite_books):
+                matched = books[(books["Book-Author"] == author) & (books["Book-Title"] == title)]
+                if not matched.empty:
+                    favorite_isbns.append(matched.iloc[0]["ISBN"])
+
 
             if len(favorite_isbns) == 0:
                 st.error("None of these books were found in the dataset :(")

@@ -65,7 +65,7 @@ print(missing_values_ratings[missing_values_ratings > 0])
 print ("\n--- Duplicates ---")
 print(f"Books duplicates: {books.duplicated(subset=['ISBN']).sum()}")
 print(f"Ratings duplicates: {ratings.duplicated().sum()}")
-
+print(f"Users duplicates: {users.duplicated(subset=['User-ID']).sum()}")
 
 #---STEP 2 : Cleaning data---
 print("=== STEP 2 : Cleaning data ===")
@@ -162,7 +162,7 @@ top_users = ratings['User-ID'].value_counts().head(10)
 print("\nTop 10 most active users:")
 print(top_users)
 
-# A few users are extremely active and rated hundreds of books.
+# A few users are extremely active and rated thousands of books.
 # These "power users" can strongly influence collaborative filtering models.
 # The dataset is imbalanced — most users rated only a few books.
 
@@ -200,15 +200,15 @@ print(ratings_books_users.head())
 #Save merged dataset
 ratings_books_users.to_csv("/Users/chloexie/Documents/3A IMT/Keio/computer science/book_recommendation_project/data/merged_clean.csv", index=False)
 
-#---STEP 5 : Create User-Item Matrix and Similarity Matrix---
-print("\n=== STEP 5 : Create User-Item Matrix and Similarity Matrix ===")
+#---STEP 5 : Create Book-User Matrix and Similarity Matrix---
+print("\n=== STEP 5 : Create Book-User Matrix and Similarity Matrix ===")
 
 # The user-item matrix represents users as rows and books as columns.
 # Each cell contains the rating a user gave to a book (NaN if not rated).
 # This matrix is the foundation for collaborative filtering models.
 # The similarity matrix measures how similar users (or books) are based on their ratings, and it is used to find similar users or items for generating recommendations.
 
-#Create the User-Item Matrix 
+#Create the Book-User Matrix 
 book_user_matrix = ratings.pivot_table(index='ISBN', columns='User-ID', values='Book-Rating')
 
 print("Book-User matrix shape:", book_user_matrix.shape)
@@ -219,10 +219,14 @@ print(book_user_matrix.isnull().sum().sum())  # Count missing ratings (NaN)
 # Visualize sparsity of the book-users matrix
 plt.figure(figsize=(8,6))
 plt.spy(book_user_matrix, markersize=1, color='black')
-plt.title("User-Item Matrix Sparsity")
+plt.title("Book-User Matrix Sparsity")
 plt.xlabel("Users")
 plt.ylabel("Books")
 plt.show()
+
+density = book_user_matrix.count().sum() / (book_user_matrix.shape[0] * book_user_matrix.shape[1])
+print(f"Matrix density: {density:.4%}")
+
 
 # Each black point represents a rating. Most cells are empty (NaN), showing sparsity typical in recommendation systems.
 

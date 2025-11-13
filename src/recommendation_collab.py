@@ -88,10 +88,10 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
     #Top N recommendations
     top_isbns = sim_scores.sort_values(ascending=False).head(top_n).index
     # Keep only top_isbns present in books_df
-    top_isbns_in_books = [isbn for isbn in top_isbns if isbn in books_df['ISBN'].values]
-    recommended_books = books_df[books_df['ISBN'].isin(top_isbns_in_books)].copy()
+    #top_isbns_in_books = [isbn for isbn in top_isbns if isbn in books_df['ISBN'].values]
+    recommended_books = books_df[books_df['ISBN'].isin(top_isbns)][['ISBN', 'Book-Title', 'Book-Author']].copy()
     recommended_books['score']=recommended_books['ISBN'].map(lambda x: sim_scores.get(x, 0))
-    recommended_books = recommended_books.set_index('ISBN').loc[top_isbns_in_books].reset_index()
+    recommended_books = recommended_books.set_index('ISBN').loc[top_isbns].reset_index()
     return recommended_books
 
 # --- Example  ---
