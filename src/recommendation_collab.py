@@ -22,6 +22,7 @@ SIMILARITY_PICKLE = os.path.join(DATA_DIR, "book_similarity.pkl")
 books = pd.read_csv(BOOKS_FILE)
 ratings = pd.read_csv(RATINGS_FILE)
 
+
 #Quick check
 print(f"Loaded books: {books.shape},ratings : {ratings.shape}")
 
@@ -66,6 +67,10 @@ def compute_book_similarity(book_item_df, rebuild=False):
 book_similarity = compute_book_similarity(book_user_matrix,rebuild=False)
 print("Book similarity matrix shape : ", book_similarity.shape)
 
+#print for debug
+print("BOOK ISBN type:", type(books['ISBN'].iloc[0]))
+print("SIM INDEX type:", type(book_similarity.index[0]))
+
 #--- Recommendation function ---
 def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df, top_n=5):
     """
@@ -81,12 +86,19 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
     if not valid_isbns:
         print('No valid ISBNS found in matrix.')
         return pd.DataFrame()
+    #print for debug
+    print("favorite_isbns: ",favorite_isbns)
+    print("valid_isbns: ", valid_isbns)
     # Aggregate similarity scores
     sim_scores = book_similarity_df.loc[valid_isbns].sum(axis=0)
     sim_scores = sim_scores.drop(labels=valid_isbns,errors='ignore')
 
     #Top N recommendations
     top_isbns = sim_scores.sort_values(ascending=False).head(top_n).index
+    
+    #print for debug
+    print("top_isbns: ",list(top_isbns))
+    
     # Keep only top_isbns present in books_df
     #top_isbns_in_books = [isbn for isbn in top_isbns if isbn in books_df['ISBN'].values]
     recommended_books = books_df[books_df['ISBN'].isin(top_isbns)][['ISBN', 'Book-Title', 'Book-Author']].copy()

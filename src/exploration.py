@@ -97,6 +97,10 @@ ratings = ratings[ratings['User-ID'].isin(user_counts[user_counts>5].index)]
 book_counts = ratings['ISBN'].value_counts()
 ratings = ratings[ratings['ISBN'].isin(book_counts[book_counts >3].index)]
 
+#Create a book model that contained only the books in the matrix rating
+valid_isbns = ratings['ISBN'].unique()
+books = books[books['ISBN'].isin(valid_isbns)] #books filtered
+
 #Show final shapes
 print("Cleaned data :")
 print(f"Books : {books.shape}")
