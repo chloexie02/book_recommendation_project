@@ -9,6 +9,7 @@ import seaborn as sns
 import os
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
+import re
 
 ##----------------------GET DATA------------------------------------------------------------
 ###----------------------DATA EXPLORATION---------------------------------------------------
@@ -66,6 +67,50 @@ print ("\n--- Duplicates ---")
 print(f"Books duplicates: {books.duplicated(subset=['ISBN']).sum()}")
 print(f"Ratings duplicates: {ratings.duplicated().sum()}")
 print(f"Users duplicates: {users.duplicated(subset=['User-ID']).sum()}")
+
+#We try to merge the authors who are appear twice but with a different typography (ex: Franz Kafka vs FRANZ KAFKA)
+def normalize_author(author):
+    if pd.isna(author):
+        return author
+    
+    #lowercase
+    author = author.lower().strip()
+
+    #manage "Kafka, Franz" -> "Franz Kafka"
+    if ',' in author : 
+        parts = [p.strip() for p in author.split(',')]
+        if len(parts)==2:
+            author = parts[1]+' '+parts[0]
+        
+    #remove the punctuation
+    author = re.sub(r'[^\w\s]','',author)
+
+    #remove multiple space
+    author = re.sub(r'\s+',' ',author)
+    return author
+
+books['author_norm']=books['Book-Author'].apply(normalize_author)
+
+# Trying to chose the right typo (Franz Kafka instead of FRANZ KAFKA)
+author_display = (
+    books
+    .groupby('author_norm')['Book-Author']
+    .agg(lambda x : x.value_counts().idxmax())
+    .reset_index()
+    .rename(columns={'Book-Author':'author_display'})
+)
+
+books = books.merge(author_display, on ='author_norm', how='left')
+books['Book-Author']=books['author_display']
+books=books.drop(columns=['author_display'])
+
+#Now, let's try to merge books by an author that appear multiple times
+print(
+    books[
+        books['author_norm'] == 'franz kafka'
+    ][['Book-Author']]
+    .drop_duplicates()
+)
 
 #---STEP 2 : Cleaning data---
 print("=== STEP 2 : Cleaning data ===")
