@@ -115,11 +115,17 @@ if mode == "📚 Based on my favorite books":
             if len(favorite_isbns) == 0:
                 st.error("None of these books were found in the dataset :(")
             else:
-                st.success("Generating your recommendations...")
+                #st.success("Generating your recommendations...")
                 recs = recommend_books_from_favorites(favorite_isbns, book_similarity, books, top_n=5)
 
                 st.markdown("### Recommended Books for You:")
-                st.table(recs[["Book-Title", "Book-Author", "score"]])
+                recs = recs.reset_index(drop=True)
+                recs.index = recs.index + 1 # to have the favorite index from 1 to 5 instead of 0 to 4
+                #st.table(recs[["Book-Title", "Book-Author", "score"]])
+                if recs.empty:
+                    st.error("No recommendation possible: these books do not have enough ratings.")
+                else:
+                    st.table(recs[["Book-Title", "Book-Author"]])#, "score"]])
 
 # --- Option 2: Metadata (inactive) ---
 elif mode == "🔍 Based on metadata (coming soon!)":

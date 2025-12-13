@@ -85,7 +85,8 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
     valid_isbns=[isbn for isbn in favorite_isbns if isbn in book_similarity_df.index]
     if not valid_isbns:
         print('No valid ISBNS found in matrix.')
-        return pd.DataFrame()
+        #return pd.DataFrame()
+        return pd.DataFrame(colums=['ISBN','Book-Title','Book-Author','score'])
     #print for debug
     print("favorite_isbns: ",favorite_isbns)
     print("valid_isbns: ", valid_isbns)
@@ -104,6 +105,7 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
     recommended_books = books_df[books_df['ISBN'].isin(top_isbns)][['ISBN', 'Book-Title', 'Book-Author']].copy()
     recommended_books['score']=recommended_books['ISBN'].map(lambda x: sim_scores.get(x, 0))
     recommended_books = recommended_books.set_index('ISBN').loc[top_isbns].reset_index()
+    print(recommended_books[['ISBN', 'score']])
     return recommended_books
 
 # --- Example  ---
