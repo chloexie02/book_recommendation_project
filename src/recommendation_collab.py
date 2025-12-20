@@ -22,6 +22,10 @@ SIMILARITY_PICKLE = os.path.join(DATA_DIR, "book_similarity.pkl")
 books = pd.read_csv(BOOKS_FILE)
 ratings = pd.read_csv(RATINGS_FILE)
 
+#security
+valid_isbns = ratings['ISBN'].unique()
+books = books[books['ISBN'].isin(valid_isbns)].copy()
+
 
 #Quick check
 print(f"Loaded books: {books.shape},ratings : {ratings.shape}")
@@ -86,7 +90,7 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
     if not valid_isbns:
         print('No valid ISBNS found in matrix.')
         #return pd.DataFrame()
-        return pd.DataFrame(colums=['ISBN','Book-Title','Book-Author','score'])
+        return pd.DataFrame(columns=['ISBN','Book-Title','Book-Author','score'])
     #print for debug
     print("favorite_isbns: ",favorite_isbns)
     print("valid_isbns: ", valid_isbns)
@@ -102,7 +106,7 @@ def recommend_books_from_favorites(favorite_isbns, book_similarity_df, books_df,
     
     # Keep only top_isbns present in books_df
     #top_isbns_in_books = [isbn for isbn in top_isbns if isbn in books_df['ISBN'].values]
-    recommended_books = books_df[books_df['ISBN'].isin(top_isbns)][['ISBN', 'Book-Title', 'Book-Author']].copy()
+    recommended_books = books_df[books_df['ISBN'].isin(top_isbns)][['ISBN', 'Book-Title', 'Book-Author','Image-URL-M']].copy()
     recommended_books['score']=recommended_books['ISBN'].map(lambda x: sim_scores.get(x, 0))
     recommended_books = recommended_books.set_index('ISBN').loc[top_isbns].reset_index()
     print(recommended_books[['ISBN', 'score']])

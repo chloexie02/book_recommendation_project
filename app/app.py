@@ -4,9 +4,15 @@ import sys
 import os
 import streamlit as st
 import pandas as pd
+import requests
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..','src')))
 
 from recommendation_collab import recommend_books_from_favorites, book_similarity, books
+
+#path for BookCoverNotFound.png image
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+NO_COVER_PATH = os.path.join(BASE_DIR, "..", "assets", "BookCoverNotFound.png")
+
 
 #---Page congif---
 st.set_page_config(page_title = "Book Recommendation", page_icon="📚", layout="wide")
@@ -119,14 +125,40 @@ if mode == "📚 Based on my favorite books":
                 recs = recommend_books_from_favorites(favorite_isbns, book_similarity, books, top_n=5)
 
                 st.markdown("### Recommended Books for You:")
-                recs = recs.reset_index(drop=True)
-                recs.index = recs.index + 1 # to have the favorite index from 1 to 5 instead of 0 to 4
-                #st.table(recs[["Book-Title", "Book-Author", "score"]])
-                if recs.empty:
-                    st.error("No recommendation possible: these books do not have enough ratings.")
-                else:
-                    st.table(recs[["Book-Title", "Book-Author"]])#, "score"]])
+                #recs = recs.reset_index(drop=True)
+                #recs.index = recs.index + 1 # to have the favorite index from 1 to 5 instead of 0 to 4
+                #if recs.empty:
+                #    st.error("No recommendation possible: these books do not have enough ratings.")
+                #else:
+                #    st.table(recs[["Book-Title", "Book-Author"]])#, "score"]])
+                # UI security
 
+                if recs.empty:
+                    st.error("No reccomendation possible")
+                else:
+                    cols2 = st.columns(len(recs))
+
+                for i, (col, (_, row)) in enumerate(zip(cols2, recs.iterrows()), start=1):
+                    with col:
+                        st.markdown(f"**{i}**")
+
+                        # Book Image
+                        if pd.notna(row["Image-URL-M"]):
+                            st.image(row["Image-URL-M"], width=120)
+                        else:
+                            st.image(NO_COVER_PATH, width=120)
+
+                        # Title
+                        st.markdown(
+                        f"<div style='font-weight:600; text-align:center;'>{row['Book-Title']}</div>",
+                        unsafe_allow_html=True
+                        )
+
+                        # Author
+                        st.markdown(
+                        f"<div style='color:gray; font-size:14px; text-align:center;'>{row['Book-Author']}</div>",
+                        unsafe_allow_html=True
+                        )
 # --- Option 2: Metadata (inactive) ---
 elif mode == "🔍 Based on metadata (coming soon!)":
     st.info("🚧 This feature will be available soon! You'll be able to search by author, genre etc.")
