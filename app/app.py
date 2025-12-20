@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..','src
 from recommendation_collab import recommend_books_from_favorites, book_similarity, books
 
 #---Page congif---
-st.set_page_config(page_title = "Book Recommendation", page_icon="📚", layout="centered")
+st.set_page_config(page_title = "Book Recommendation", page_icon="📚", layout="wide")
 
 #--- CSS CUSTOM ---
 st.markdown("""
@@ -70,7 +70,7 @@ if mode == "📚 Based on my favorite books":
 
     #favorite_books = [fav for fav in [fav1, fav2, fav3, fav4, fav5] if fav]
 
-    cols = st.columns(5)
+    cols = st.columns([3, 3, 3, 3, 3])
     for i, col in enumerate(cols):
         with col:
             st.markdown(f"**Book {i+1}**")
