@@ -8,6 +8,8 @@ from pandas.plotting import scatter_matrix
 import seaborn as sns
 import os
 import pickle
+import requests
+import time
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 
@@ -142,10 +144,6 @@ ratings = ratings[ratings['User-ID'].isin(user_counts[user_counts>5].index)]
 book_counts = ratings['ISBN'].value_counts()
 ratings = ratings[ratings['ISBN'].isin(book_counts[book_counts >3].index)]
 
-#Create a book model that contained only the books in the matrix rating
-valid_isbns = ratings['ISBN'].unique()
-books = books[books['ISBN'].isin(valid_isbns)] #books filtered
-
 #Show final shapes
 print("Cleaned data :")
 print(f"Books : {books.shape}")
@@ -181,6 +179,10 @@ print(ratings['Book-Rating'].describe())
 
 # Before removing 0-ratings, most values were 0 (implicit ratings), meaning many users did not explicitly rate books.
 # After removing them, the average rating is around 7.7 — users tend to give high scores (positive bias in ratings).
+
+#Create a book model that contained only the books in the matrix rating
+valid_isbns = ratings['ISBN'].unique()
+books = books[books['ISBN'].isin(valid_isbns)] #books filtered
 
 
 #2.Distribution of Ratings
@@ -300,3 +302,6 @@ print(f"User-Item matrix saved at: {BOOK_USER_PICKLE}")
 with open(SIMILARITY_PICKLE, "wb") as f:
     pickle.dump(book_similarity, f)
 print(f"User similarity matrix saved at: {SIMILARITY_PICKLE}")
+
+
+
