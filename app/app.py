@@ -9,6 +9,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..','src
 
 from recommendation_collab import recommend_books_from_favorites, book_similarity, books
 
+books_enriched = pd.read_pickle(os.path.join(os.path.dirname(__file__),"..","data","books_enriched.pkl"))
+
+
 #path for BookCoverNotFound.png image
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 NO_COVER_PATH = os.path.join(BASE_DIR, "..", "assets", "BookCoverNotFound.png")
@@ -46,7 +49,7 @@ st.markdown("<h1 class='title'> Book Recommendation System</h1>", unsafe_allow_h
 #--- Choice page ---
 mode = st.radio(
     "Select a recommendation type:",
-    ("📚 Based on my favorite books", "🔍 Based on metadata (coming soon!)"),
+    ("📚 Based on my favorite books", "🔍 Based on metadata"),
     index=0
 )
 
@@ -160,5 +163,108 @@ if mode == "📚 Based on my favorite books":
                         unsafe_allow_html=True
                         )
 # --- Option 2: Metadata (inactive) ---
-elif mode == "🔍 Based on metadata (coming soon!)":
-    st.info("🚧 This feature will be available soon! You'll be able to search by author, genre etc.")
+elif mode == "🔍 Based on metadata":
+    st.markdown("### Find books using metadata")
+
+    books_meta=books_enriched.copy()
+
+    #---Filter---
+    categories = sorted(
+        set(
+            cat
+            for cats in books_meta["categories"].dropna()
+            if isinstance(cats, list)
+            for cat in cats
+        )
+    )
+
+    authors = sorted(books_meta["Book-Author"].dropna().unique())
+    publishers = sorted(books_meta["publisher"].dropna().unique())
+    languages = sorted(books_meta["language"].dropna().unique())
+    #print_types = sorted(books_meta["printType"].dropna().unique())
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        selected_category = st.multiselect("Category", [""] + categories)
+        selected_author = st.multiselect("Author", [""] + authors)
+
+    with col2:
+        selected_publisher = st.multiselect("Publisher", [""] + publishers)
+        
+
+    with col3:
+        selected_language = st.multiselect("Language", [""] + languages)
+    #    selected_print = st.multiselect("Print type", [""] + print_types)
+
+    year_min, year_max = st.slider(
+        "Publication year",
+        min_value=1800,
+        max_value=2024,
+        value=(1900, 2020)
+    )
+
+    page_min, page_max = st.slider(
+        "Number of pages",
+        min_value=0,
+        max_value=2000,
+        value=(0, 600)
+    )
+
+    # ---------- SEARCH ----------
+    if st.button("Find books"):
+
+        filtered = books_meta.copy()
+
+        if selected_category:
+            filtered = filtered[
+                filtered["categories"].apply(
+                    lambda cats: any(cat in cats for cat in selected_category)
+                    if isinstance(cats, list)
+                     else False
+                )
+            ]
+
+
+        if selected_author:
+            filtered = filtered[filtered["Book-Author"].isin(selected_author)]
+
+        if selected_publisher:
+            filtered = filtered[filtered["publisher"].isin(selected_publisher)]
+
+        if selected_language:
+            filtered = filtered[filtered["language"].isin(selected_language)]
+
+        #if selected_print:
+        #    filtered = filtered[filtered["printType"].isin(selected_print)]
+
+        filtered = filtered[
+            (filtered["published_year"].between(year_min, year_max)) &
+            (filtered["pageCount"].between(page_min, page_max))
+        ]
+
+        # ---------- RESULTS ----------
+        if filtered.empty:
+            st.error(" No book matches all these criteria.")
+        else:
+            results = (
+                filtered
+                .sort_values(by="averageRating", ascending=False)
+                .head(5)
+            )
+
+            st.markdown("### 📚 Recommended books")
+
+            cols = st.columns(len(results))
+            for col, (_, row) in zip(cols, results.iterrows()):
+                with col:
+                    st.image(
+                        row["Image-URL-M"]
+                        if pd.notna(row["Image-URL-M"])
+                        else NO_COVER_PATH,
+                        width=120
+                    )
+                    st.markdown(f"**{row['Book-Title']}**")
+                    st.caption(row["Book-Author"])
+
+    #st.info("🚧 This feature will be available soon! You'll be able to search by author, genre etc.")
