@@ -24,6 +24,7 @@ max_pages = int(books_enriched["pageCount"].max())
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 NO_COVER_PATH = os.path.join(BASE_DIR, "..", "assets", "BookCoverNotFound.png")
 
+@st.cache_data(show_spinner=False)
 def is_valid_book_cover(url):
     try:
         headers = {
@@ -103,20 +104,6 @@ if mode == "📚 Based on my favorite books":
     favorite_authors = []
 
     # Create 5 columns for 5 favorite book selections
-
-    #col1, col2, col3, col4, col5 = st.columns(5)
-    #with col1:
-    #    fav1 = st.text_input("Book 1")
-    #with col2:
-    #    fav2 = st.text_input("Book 2")
-    #with col3:
-    #    fav3 = st.text_input("Book 3")
-    #with col4:
-    #    fav4 = st.text_input("Book 4")
-    #with col5:
-    #    fav5 = st.text_input("Book 5")
-
-    #favorite_books = [fav for fav in [fav1, fav2, fav3, fav4, fav5] if fav]
 
     cols = st.columns([3, 3, 3, 3, 3])
     for i, col in enumerate(cols):
@@ -216,12 +203,18 @@ if mode == "📚 Based on my favorite books":
                             is_valid, _ = is_valid_book_cover(row["Image-URL-M"])
 
                             if is_valid:
-                                st.image(row["Image-URL-M"], width=120)
+                                st.markdown(
+                                f"""
+                                <div style="display: flex; justify-content: center;">
+                                <img src="{row['Image-URL-M']}" width="120">
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                                )
                             else:
                                 st.image(NO_COVER_PATH, width=120)
                        
-                        
-
+                    
                             # Title
                             st.markdown(
                             f"<div style='font-weight:600; text-align:center;'>{row['Book-Title']}</div>",
@@ -289,7 +282,7 @@ elif mode == "🔍 Based on metadata":
     )
 
     # ---------- SEARCH ----------
-    if st.button("Find books"):
+    if st.button("Show Recommendations "):
 
         filtered = books_meta.copy()
 
@@ -357,13 +350,20 @@ elif mode == "🔍 Based on metadata":
                     is_valid, _ = is_valid_book_cover(row["Image-URL-M"])
 
                     if is_valid:
-                        st.image(row["Image-URL-M"], width=120)
+                        #st.image(row["Image-URL-M"], width=120)
+                        st.markdown(
+                                f"""
+                                <div style="display: flex; justify-content: center;">
+                                <img src="{row['Image-URL-M']}" width="120">
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                                )
                     else:
                         st.image(NO_COVER_PATH, width=120)
+                        
+
                        
-
-
-                  
                     st.markdown(
                             f"<div style='font-weight:600; text-align:center;'>{row['Book-Title']}</div>",
                             unsafe_allow_html=True
@@ -372,5 +372,15 @@ elif mode == "🔍 Based on metadata":
                             f"<div style='color:gray; font-size:14px; text-align:center;'>{row['Book-Author']}</div>",
                             unsafe_allow_html=True
                             )
+                    
+                    if pd.isna(row['description']) or row['description'] is None or str(row['description']).strip() == "" : 
+                        description_text = "No description"
+                    else:
+                        description_text = row['description']
 
-    #st.info("🚧 This feature will be available soon! You'll be able to search by author, genre etc.")
+                    st.markdown(
+                            f"<div style='color:gray; font-size:14px; text-align:center;font-style:italic;'>{description_text}</div>",
+                            unsafe_allow_html=True
+                            )
+
+    

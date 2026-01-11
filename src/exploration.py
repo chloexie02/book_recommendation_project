@@ -70,6 +70,10 @@ print(f"Books duplicates: {books.duplicated(subset=['ISBN']).sum()}")
 print(f"Ratings duplicates: {ratings.duplicated().sum()}")
 print(f"Users duplicates: {users.duplicated(subset=['User-ID']).sum()}")
 
+#---STEP 2 : Cleaning data---
+print("=== STEP 2 : Cleaning data ===")
+
+#1.Normalization and harmonization of author names
 #We try to merge the authors who are appear twice but with a different typography (ex: Franz Kafka vs FRANZ KAFKA)
 def normalize_author(author):
     if pd.isna(author):
@@ -114,15 +118,12 @@ print(
     .drop_duplicates()
 )
 
-#---STEP 2 : Cleaning data---
-print("=== STEP 2 : Cleaning data ===")
-
-#1.Remove duplicates
+#2.Remove duplicates
 books.drop_duplicates(subset=['ISBN'],inplace=True) #each book should have a unique ISBN, so we keep one per book
 ratings.drop_duplicates(inplace=True) #some users might have rated the same book twice
 users.drop_duplicates(subset=['User-ID'],inplace=True) #each user should appear once
 
-#2.Remove missing values
+#3.Remove missing values
 #Books : drop rows where Book-Title or Book-Author is missing
 books.dropna(subset=['Book-Title','Book-Author'],inplace=True)
 #Ratings : normally no missing values, but keep for safety
@@ -136,11 +137,11 @@ users.dropna(subset=['User-ID'],inplace=True)
 #if 'Age' in users.columns:
 #    users.drop(columns=['Age'], inplace=True)
 
-#3.Keep only active users (those who rated more than 5 books)
+#4.Keep only active users (those who rated more than 5 books)
 user_counts = ratings['User-ID'].value_counts()
 ratings = ratings[ratings['User-ID'].isin(user_counts[user_counts>5].index)]
 
-#4.Keep only popular books (those with more than 3 ratings)
+#5.Keep only popular books (those with more than 3 ratings)
 book_counts = ratings['ISBN'].value_counts()
 ratings = ratings[ratings['ISBN'].isin(book_counts[book_counts >3].index)]
 
@@ -203,6 +204,13 @@ plt.show()
 top_books = ratings['ISBN'].value_counts().head(10)
 print("\nTop 10 most rated books :")
 print(top_books)
+
+plt.figure(figsize=(12,5))
+sns.barplot(x=top_books.index.astype(str), y=top_books.values, palette='Spectral')
+plt.title("Top 10 Most Rated Books")
+plt.xlabel("ISBN")
+plt.ylabel("Number of Ratings")
+plt.show()
 
 # The most rated books are likely best-sellers or very popular titles.
 # Popular books are overrepresented, which may bias recommendations towards them.

@@ -30,7 +30,7 @@ all_categories = []
 all_authors = []
 all_publishers = []
 all_languages = []
-all_print_types=[]
+#all_print_types=[]
 all_dates=[]
 all_page_counts=[]
 all_avg_ratings =[]
@@ -77,10 +77,10 @@ for isbn in isbns:
             all_languages.append(language)
 
         #Print Type
-        print_type = volume_info.get("printType")
-        if print_type is not None:
-            type_tracker["printType"].add(type(print_type))
-            all_print_types.append(print_type)
+        #print_type = volume_info.get("printType")
+        #if print_type is not None:
+        #    type_tracker["printType"].add(type(print_type))
+        #    all_print_types.append(print_type)
 
         #Published date
         published_date = volume_info.get("publishedDate")
@@ -127,8 +127,8 @@ print("\nLANGUAGES:")
 print(Counter(all_languages))
 
 #Print types
-print("\nPRINT TYPES:")
-print(Counter(all_print_types))
+#print("\nPRINT TYPES:")
+#print(Counter(all_print_types))
 
 #Published date formats
 print("\nPUBLISHED DATE EXAMPLES:")
@@ -220,7 +220,7 @@ def main():
         books["published_year"] = None
         books["pageCount"] = None
         books["language"] = None
-        books["printType"] = None
+        #books["printType"] = None
         books["averageRating"] = None
 
         print(" Enriching books with Google Books metadata...")
@@ -245,7 +245,7 @@ def main():
             books.at[idx, "published_year"] = extract_year(meta.get("publishedDate"))
             books.at[idx, "pageCount"] = meta.get("pageCount")
             books.at[idx, "language"] = meta.get("language")
-            books.at[idx, "printType"] = meta.get("printType")
+            #books.at[idx, "printType"] = meta.get("printType")
             books.at[idx, "averageRating"] = meta.get("averageRating")
 
             if idx % 100 == 0:
