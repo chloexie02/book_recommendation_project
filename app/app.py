@@ -153,6 +153,12 @@ if mode == "📚 Based on my favorite books":
                 #st.success("Generating your recommendations...")
                 recs = recommend_books_from_favorites(favorite_isbns, book_similarity, books, top_n=5)
 
+                recs = recs.merge(
+                books_enriched[["ISBN", "description"]],
+                on="ISBN",
+                how="left"
+                )
+
                 st.markdown("### Recommended Books for You:")
                 #recs = recs.reset_index(drop=True)
                 #recs.index = recs.index + 1 # to have the favorite index from 1 to 5 instead of 0 to 4
@@ -173,12 +179,7 @@ if mode == "📚 Based on my favorite books":
                             st.markdown(f"""<div style="text-align:center;font-size:22px;font-weight:700;margin-bottom:6px;">{i}</div>""",unsafe_allow_html=True)
 
                             # Book Image
-                            #if pd.notna(row["Image-URL-M"]):
-                                #st.image(row["Image-URL-M"], width=120)
-                            #    st.markdown(f"""<div style="text-align:center;"><img src="{row['Image-URL-M']}"width="120"style="margin:auto;"onerror="this.onerror=null; this.src='{NO_COVER_PATH}';"> </div> """,unsafe_allow_html=True)
-                            #else:
-                            #    st.image(NO_COVER_PATH, width=120)
-
+                            
                             # st.markdown(
                             # f"""
                             # <div style="
@@ -226,6 +227,21 @@ if mode == "📚 Based on my favorite books":
                             f"<div style='color:gray; font-size:14px; text-align:center;'>{row['Book-Author']}</div>",
                             unsafe_allow_html=True
                             )
+                            #Description
+                            if pd.isna(row["description"]) or row["description"] is None or str(row["description"]).strip() == "":
+                                description_text = "No description"
+                            else:
+                                description_text = row["description"]
+
+                            st.markdown(
+                            f"<div style='color:gray; font-size:14px; text-align:center; font-style:italic;'>"
+                            f"{description_text}"
+                            f"</div>",
+                            unsafe_allow_html=True
+                            )
+
+
+
 # --- Option 2: Metadata (inactive) ---
 elif mode == "🔍 Based on metadata":
     st.markdown("### Find books using metadata")
@@ -308,11 +324,6 @@ elif mode == "🔍 Based on metadata":
         #if selected_print:
         #    filtered = filtered[filtered["printType"].isin(selected_print)]
 
-        #filtered = filtered[
-        #    (filtered["published_year"].between(year_min, year_max)) &
-        #    (filtered["pageCount"].between(page_min, page_max))
-        #]
-
         if use_year_filter:
             filtered_books = filtered[
             (filtered["published_year"] >= year_min) &
@@ -381,6 +392,4 @@ elif mode == "🔍 Based on metadata":
                     st.markdown(
                             f"<div style='color:gray; font-size:14px; text-align:center;font-style:italic;'>{description_text}</div>",
                             unsafe_allow_html=True
-                            )
-
-    
+                            )   
