@@ -91,6 +91,7 @@ book_recommendation_project/
 │   ├── enrich_books_metadata.py  # Google Books API enrichment
 │
 ├── venv
+├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
@@ -123,4 +124,5 @@ streamlit run app.py
 
 ## Author
 Xie Chloe
+
 Keio University
